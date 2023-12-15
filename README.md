@@ -20,7 +20,7 @@ The module will automatically create resources if they are present in the **.yam
 **aws_vpcs.yaml**
 ```yml
 ---
-connector_aws:
+aws_vpcs:
   - name: 'vpc-east'
     description: 'AWS East Workloads'
     aws_account_id: '12345'
