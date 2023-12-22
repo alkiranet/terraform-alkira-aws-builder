@@ -37,21 +37,24 @@ resource "aws_subnet" "subnet" {
 
         # If vpc.subnets is == null, use coalesce with empty list
         for subnet in coalesce(vpc.subnets, []) : {
-          vpc_name        = vpc.name
-          subnet_name     = subnet.name
-          cidr_block      = subnet.cidr
-          create_network  = vpc.create_network
+          availability_zone = subnet.zone
+          cidr_block        = subnet.cidr
+          create_network    = vpc.create_network
+          subnet_name       = subnet.name
+          vpc_name          = vpc.name
         }
       ]
     ]) : "${subnet.vpc_name}-${subnet.subnet_name}" => {
-      cidr_block = subnet.cidr_block
-      vpc_id     = aws_vpc.vpc[subnet.vpc_name].id
-      name       = subnet.subnet_name
+      availability_zone = subnet.availability_zone
+      cidr_block        = subnet.cidr_block
+      name              = subnet.subnet_name
+      vpc_id            = aws_vpc.vpc[subnet.vpc_name].id
     } if subnet.create_network
   }
 
-  vpc_id     = each.value.vpc_id
-  cidr_block = each.value.cidr_block
+  availability_zone = each.value.availability_zone
+  cidr_block        = each.value.cidr_block
+  vpc_id            = each.value.vpc_id
 
   tags = {
     Name = each.value.name
