@@ -1,9 +1,3 @@
-# variable "aws_vpc" {
-#   description = "Controls if AWS Connectors are created"
-#   type        = bool
-#   default     = false
-# }
-
 variable "aws_vpc_data" {
   type = list(object({
 
@@ -25,6 +19,7 @@ variable "aws_vpc_data" {
       create_vm        = optional(bool, false)
       name             = string
       vm_type          = optional(string, "t2.nano")
+      zone             = optional(string)
     })))
 
   }))
