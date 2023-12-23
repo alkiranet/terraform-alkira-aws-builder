@@ -202,17 +202,20 @@ resource "aws_default_security_group" "default" {
 
 locals {
 
-  # filter 'segment' data
-  filter_segments     = var.aws_vpc_data[*].segment
+  # filter 'billing_tag' data
+  filter_billing_tags = [for vpc in var.aws_vpc_data : vpc.billing_tag if vpc.billing_tag != null]
 
   # filter 'credential' data
-  filter_credentials  = var.aws_vpc_data[*].credential
+  filter_credentials   = var.aws_vpc_data[*].credential
+
+  # filter 'segment' data
+  filter_segments      = var.aws_vpc_data[*].segment
 
 }
 
-data "alkira_segment" "segment" {
+data "alkira_billing_tag" "billing_tag" {
 
-  for_each = toset(local.filter_segments)
+  for_each = toset(local.filter_billing_tags)
 
   name = each.value
 
@@ -226,6 +229,14 @@ data "alkira_credential" "credential" {
 
 }
 
+data "alkira_segment" "segment" {
+
+  for_each = toset(local.filter_segments)
+
+  name = each.value
+
+}
+
 /*
 alkira_connector_aws_vpc
 https://registry.terraform.io/providers/alkiranet/alkira/latest/docs/resources/connector_aws_vpc
@@ -234,6 +245,7 @@ locals {
   filter_aws_vpcs = flatten([
     for c in var.aws_vpc_data : {
         aws_account_id   = c.aws_account_id
+        billing_tag      = c.billing_tag != null ? data.alkira_billing_tag.billing_tag[c.billing_tag].id : null
         connect_network  = c.connect_network
         create_network   = c.create_network
         credential       = lookup(data.alkira_credential.credential, c.credential, null).id
@@ -259,6 +271,7 @@ resource "alkira_connector_aws_vpc" "connector" {
 
   aws_account_id  = each.value.aws_account_id
   aws_region      = each.value.region
+  billing_tag_ids = each.value.billing_tag != null ? [each.value.billing_tag] : []
   credential_id   = each.value.credential
   cxp             = each.value.cxp
   group           = each.value.group
