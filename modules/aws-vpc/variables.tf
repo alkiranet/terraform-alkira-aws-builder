@@ -1,6 +1,7 @@
 variable "aws_vpc_data" {
   type = list(object({
     aws_account_id     = string
+    billing_tag        = optional(string)
     connect_network    = optional(bool, true)
     create_network     = optional(bool, false)
     credential         = string
