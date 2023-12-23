@@ -10,9 +10,10 @@ resource "aws_vpc" "vpc" {
 
   cidr_block = each.value.network_cidr
 
-  tags = {
-    Name = each.value.name
-  }
+  tags = merge(
+    { "Name" = each.value.name },
+    each.value.tags
+  )
 
 }
 
@@ -42,6 +43,7 @@ resource "aws_subnet" "subnet" {
           create_network    = vpc.create_network
           subnet_name       = subnet.name
           vpc_name          = vpc.name
+          vpc_tags          = vpc.tags
         }
       ]
     ]) : "${subnet.vpc_name}-${subnet.subnet_name}" => {
@@ -49,6 +51,7 @@ resource "aws_subnet" "subnet" {
       cidr_block        = subnet.cidr_block
       name              = subnet.subnet_name
       vpc_id            = aws_vpc.vpc[subnet.vpc_name].id
+      vpc_tags          = subnet.vpc_tags
     } if subnet.create_network
   }
 
@@ -56,9 +59,10 @@ resource "aws_subnet" "subnet" {
   cidr_block        = each.value.cidr_block
   vpc_id            = each.value.vpc_id
 
-  tags = {
-    Name = each.value.name
-  }
+  tags = merge(
+    { "Name" = each.value.name },
+    each.value.vpc_tags
+  )
 
 }
 
@@ -130,10 +134,12 @@ resource "aws_instance" "instance" {
     for idx, subnet in flatten([
       for vpc in var.aws_vpc_data : [
         for subnet in coalesce(vpc.subnets, []) : {
-          vpc_name        = vpc.name
+          create_vm       = subnet.create_vm
+          name            = format("instance-%s", subnet.name)
           subnet_name     = subnet.name
           subnet_id       = aws_subnet.subnet["${vpc.name}-${subnet.name}"].id
-          create_vm       = subnet.create_vm
+          vpc_name        = vpc.name
+          vpc_tags        = vpc.tags
           vm_type         = subnet.vm_type
         }
       ]
@@ -145,9 +151,10 @@ resource "aws_instance" "instance" {
   key_name       = length(aws_key_pair.this) > 0 ? aws_key_pair.this[0].key_name : null
   subnet_id      = each.value.subnet_id
 
-  tags = {
-    Name = "instance-${each.value.vpc_name}-${each.value.subnet_name}"
-  }
+  tags = merge(
+    { "Name" = each.value.name },
+    each.value.vpc_tags
+  )
 
 }
 
@@ -186,6 +193,11 @@ resource "aws_default_security_group" "default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  tags = merge(
+    { "Name" = each.value.name },
+    aws_vpc.vpc[each.value.name].tags
+  )
+
 }
 
 locals {
@@ -219,23 +231,21 @@ alkira_connector_aws_vpc
 https://registry.terraform.io/providers/alkiranet/alkira/latest/docs/resources/connector_aws_vpc
 */
 locals {
-
   filter_aws_vpcs = flatten([
     for c in var.aws_vpc_data : {
         aws_account_id   = c.aws_account_id
-        region           = c.region
-        create_network   = c.create_network
         connect_network  = c.connect_network
+        create_network   = c.create_network
         credential       = lookup(data.alkira_credential.credential, c.credential, null).id
         cxp              = c.cxp
         group            = c.group
         name             = c.name
-        # route_table_id   = try(aws_vpc.vpc[c.name].default_route_table_id, data.aws_vpc.vpc[c.name].default_route_table_id)
-        route_table_id = c.create_network ? aws_vpc.vpc[c.name].main_route_table_id : data.aws_vpc.vpc[c.name].main_route_table_id
-        segment          = lookup(data.alkira_segment.segment, c.segment, null).id
-        size             = c.size
         network_cidr     = c.network_cidr
         network_id       = c.create_network ? lookup(aws_vpc.vpc, c.name, null).id : c.network_id
+        region           = c.region
+        route_table_id   = c.create_network ? aws_vpc.vpc[c.name].main_route_table_id : data.aws_vpc.vpc[c.name].main_route_table_id
+        segment          = lookup(data.alkira_segment.segment, c.segment, null).id
+        size             = c.size
       }
   ])
 }
@@ -251,8 +261,8 @@ resource "alkira_connector_aws_vpc" "connector" {
   aws_region      = each.value.region
   credential_id   = each.value.credential
   cxp             = each.value.cxp
-  name            = each.value.name
   group           = each.value.group
+  name            = each.value.name
   segment_id      = each.value.segment
   size            = each.value.size
   vpc_cidr        = [each.value.network_cidr]
