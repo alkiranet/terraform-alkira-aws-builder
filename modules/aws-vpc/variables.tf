@@ -6,6 +6,7 @@ variable "aws_vpc_data" {
     create_network     = optional(bool, false)
     credential         = string
     cxp                = string
+    enabled            = optional(string, true)
     group              = optional(string)
     ingress_cidrs      = optional(list(string), ["0.0.0.0/0"])
     name               = string
