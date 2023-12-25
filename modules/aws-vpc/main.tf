@@ -174,7 +174,7 @@ https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/defa
 resource "aws_default_security_group" "default" {
   for_each = local.vpcs_with_vm
 
-  vpc_id      = aws_vpc.vpc[each.key].id
+  vpc_id   = aws_vpc.vpc[each.key].id
 
   dynamic "ingress" {
     for_each = each.value.ingress_cidrs
@@ -250,6 +250,7 @@ locals {
         create_network   = c.create_network
         credential       = lookup(data.alkira_credential.credential, c.credential, null).id
         cxp              = upper(c.cxp)
+        enabled          = c.enabled
         group            = c.group
         name             = c.name
         network_cidr     = c.network_cidr
@@ -274,6 +275,7 @@ resource "alkira_connector_aws_vpc" "connector" {
   billing_tag_ids = each.value.billing_tag != null ? [each.value.billing_tag] : []
   credential_id   = each.value.credential
   cxp             = each.value.cxp
+  enabled         = each.value.enabled
   group           = each.value.group
   name            = each.value.name
   segment_id      = each.value.segment
