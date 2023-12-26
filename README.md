@@ -15,7 +15,7 @@ module "aws_vpcs" {
 ```
 
 ### Basic Usage
-This module will automatically create resources if they are present in the **.yaml** configuration with the proper _resource keys_ defined. You can find a detailed example project and files [here.](https://github.com/alkiranet/terraform-alkira-aws-builder/tree/main/examples)
+This module will automatically create resources if they are present in the **.yaml** configuration with the proper _resource keys_ defined. You can find an example project and files [here.](https://github.com/alkiranet/terraform-alkira-aws-builder/tree/main/examples)
 
 **aws_vpcs.yaml**
 ```yml
