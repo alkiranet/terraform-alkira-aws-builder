@@ -16,7 +16,7 @@ aws_vpc:
   - name: 'vpc-east-qa'
     billing_tag: 'app-team-a'
     create_network: true # This parameter should be set to 'true'
-    aws_account_id: '175759791436'
+    aws_account_id: '12345678'
     region: 'us-east-2'
     credential: 'aws'
     cxp: 'us-east-2'
@@ -30,12 +30,15 @@ aws_vpc:
 
       - name: 'subnet2-qa'
         cidr: '10.6.2.0/24'
+        create_vm: true
+        zone: 'us-east-2a' # Optionally specify availability-zone
+        vm_type: 't2.large' # Optionally specify instance type (default is t2.nano)
 
   # Provision new VPC but don't connect to Alkira
   - name: 'vpc-east-sbox'
     create_network: true # This parameter should be set to 'true'
     connect_network: false # This parameter should be set to 'false'
-    aws_account_id: '175759791436'
+    aws_account_id: '12345678'
     region: 'us-east-2'
     network_cidr: '10.7.0.0/16'
     subnets:
