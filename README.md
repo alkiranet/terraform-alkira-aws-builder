@@ -2,7 +2,7 @@
 This module creates various resources in _Alkira_ and _AWS_ from **.yaml** files.
 
 ## Basic Usage
-Define the path to your **.yaml** configuration file in the module.
+Reference [alkiranet/aws-builder/alkira](https://registry.terraform.io/modules/alkiranet/aws-builder/alkira/latest) as the _source_ and define the path to the **.yaml** configuration file.
 
 ```hcl
 module "aws_vpcs" {
@@ -14,25 +14,29 @@ module "aws_vpcs" {
 }
 ```
 
-### Configuration Example
-The module will automatically create resources if they are present in the **.yaml** configuration with the proper _resource keys_ defined.
+### Basic Usage
+This module will automatically create resources if they are present in the **.yaml** configuration with the proper _resource keys_ defined. You can find a detailed example project and files [here.](https://github.com/alkiranet/terraform-alkira-aws-builder/tree/main/examples)
 
 **aws_vpcs.yaml**
 ```yml
 ---
-aws_vpcs:
-  - name: 'vpc-east'
-    description: 'AWS East Workloads'
-    aws_account_id: '12345'
+aws_vpc:
+
+  # Connect VPC that already exists to Alkira
+  - name: 'vpc-east-dev'
+    aws_account_id: '12345678'
     region: 'us-east-2'
     credential: 'aws'
-    cxp: 'US-EAST-2'
-    group: 'cloud'
+    cxp: 'us-east-2'
+    group: 'nonprod'
     segment: 'business'
     network_cidr: '10.5.0.0/16'
-    network_id: 'vpc-012345678'
+    network_id: 'vpc-012345678' # replace with appropriate id
 ...
 ```
+
+:warning: This project is used in tandem with other projects like [azure-builder](https://registry.terraform.io/modules/alkiranet/azure-builder/alkira/latest) and [gcp-builder](https://registry.terraform.io/modules/alkiranet/gcp-builder/alkira/latest) to test and demonstrate a complete _end-to-end_ Multi-Cloud network. Since parameters like _vpc_id_ and _vpc_cidr_ exist in each cloud provider, just with different names, these modules use _network_id_ and _network_cidr_ for commonality.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
