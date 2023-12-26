@@ -9,7 +9,7 @@ module "aws_vpcs" {
   source = "alkiranet/aws-builder/alkira"
   
   # path to config
-  config_files = "./config/aws_vpcs.yaml"
+  config_files = "./aws_vpcs.yaml"
   
 }
 ```
