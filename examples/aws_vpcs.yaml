@@ -1,0 +1,54 @@
+---
+aws_vpc:
+
+  # Connect VPC that already exists to Alkira
+  - name: 'vpc-east-dev'
+    aws_account_id: '12345678'
+    region: 'us-east-2'
+    credential: 'aws'
+    cxp: 'us-east-2'
+    group: 'nonprod'
+    segment: 'business'
+    network_cidr: '10.5.0.0/16'
+    network_id: 'vpc-012345678' # replace with appropriate id
+
+  # Provision new VPC and connect to Alkira
+  - name: 'vpc-east-qa'
+    billing_tag: 'app-team-a'
+    create_network: true # This parameter should be set to 'true'
+    aws_account_id: '12345678'
+    region: 'us-east-2'
+    credential: 'aws'
+    cxp: 'us-east-2'
+    group: 'nonprod'
+    segment: 'business'
+    network_cidr: '10.6.0.0/16'
+    subnets:
+      - name: 'subnet1-qa'
+        cidr: '10.6.1.0/24'
+        create_vm: true # Optional attribute to provision instances on a per subnet basis
+
+      - name: 'subnet2-qa'
+        cidr: '10.6.2.0/24'
+        create_vm: true
+        zone: 'us-east-2a' # Optionally specify availability-zone
+        vm_type: 't2.large' # Optionally specify instance type (default is t2.nano)
+
+  # Provision new VPC but don't connect to Alkira
+  - name: 'vpc-east-sbox'
+    create_network: true # This parameter should be set to 'true'
+    connect_network: false # This parameter should be set to 'false'
+    aws_account_id: '12345678'
+    region: 'us-east-2'
+    network_cidr: '10.7.0.0/16'
+    subnets:
+      - name: 'subnet1-sbox'
+        cidr: '10.7.1.0/24'
+        create_vm: true # Optional attribute to provision instances on a per subnet basis
+
+      - name: 'subnet2-sbox'
+        cidr: '10.7.2.0/24'
+    tags: # Optional AWS tags to add to resources
+      email: 'me@email.com'
+      env: 'sbox'
+...

@@ -1,38 +1,82 @@
 # AWS Builder - Terraform Module
-This module creates various resources in _Alkira_ and _AWS_ from **.yaml** files.
+This module creates various resources in [Alkira](https://www.alkira.com/) and [AWS](https://aws.amazon.com/) from **.yaml** files. This module is ideal for deploying a flexible and private network infrastructure for building POCs, demos, or general-purpose connectivity testing between **AWS** or other _public cloud providers_.
 
 ## Basic Usage
-Define the path to your **.yaml** configuration file in the module.
+Reference [alkiranet/aws-builder/alkira](https://registry.terraform.io/modules/alkiranet/aws-builder/alkira/latest) as the _source_ and define the path to the **.yaml** configuration file.
 
 ```hcl
 module "aws_vpcs" {
   source = "alkiranet/aws-builder/alkira"
   
   # path to config
-  config_files = "./config/aws_vpcs.yaml"
+  config_files = "./aws_vpcs.yaml"
   
 }
 ```
 
-### Configuration Example
-The module will automatically create resources if they are present in the **.yaml** configuration with the proper _resource keys_ defined.
+### Basic Usage
+This module will automatically create resources if they are present in the **.yaml** configuration with the proper _resource keys_ defined. You can find an example project and files [here.](https://github.com/alkiranet/terraform-alkira-aws-builder/tree/main/examples)
 
 **aws_vpcs.yaml**
 ```yml
 ---
-aws_vpcs:
-  - name: 'vpc-east'
-    description: 'AWS East Workloads'
-    aws_account_id: '12345'
+aws_vpc:
+
+  # Connect VPC that already exists to Alkira
+  - name: 'vpc-east-dev'
+    aws_account_id: '12345678'
     region: 'us-east-2'
     credential: 'aws'
-    cxp: 'US-EAST-2'
-    group: 'cloud'
+    cxp: 'us-east-2'
+    group: 'nonprod'
     segment: 'business'
     network_cidr: '10.5.0.0/16'
-    network_id: 'vpc-012345678'
+    network_id: 'vpc-012345678' # replace with appropriate id
+
+  # Provision new VPC and connect to Alkira
+  - name: 'vpc-east-qa'
+    billing_tag: 'app-team-a'
+    create_network: true # This parameter should be set to 'true'
+    aws_account_id: '12345678'
+    region: 'us-east-2'
+    credential: 'aws'
+    cxp: 'us-east-2'
+    group: 'nonprod'
+    segment: 'business'
+    network_cidr: '10.6.0.0/16'
+    subnets:
+      - name: 'subnet1-qa'
+        cidr: '10.6.1.0/24'
+        create_vm: true # Optional attribute to provision instances on a per subnet basis
+
+      - name: 'subnet2-qa'
+        cidr: '10.6.2.0/24'
+        create_vm: true
+        zone: 'us-east-2a' # Optionally specify availability-zone
+        vm_type: 't2.large' # Optionally specify instance type (default is t2.nano)
+
+  # Provision new VPC but don't connect to Alkira
+  - name: 'vpc-east-sbox'
+    create_network: true # This parameter should be set to 'true'
+    connect_network: false # This parameter should be set to 'false'
+    aws_account_id: '12345678'
+    region: 'us-east-2'
+    network_cidr: '10.7.0.0/16'
+    subnets:
+      - name: 'subnet1-sbox'
+        cidr: '10.7.1.0/24'
+        create_vm: true # Optional attribute to provision instances on a per subnet basis
+
+      - name: 'subnet2-sbox'
+        cidr: '10.7.2.0/24'
+    tags: # Optional AWS tags to add to resources
+      email: 'me@email.com'
+      env: 'sbox'
 ...
 ```
+
+:warning: This project is used in tandem with other projects like [azure-builder](https://registry.terraform.io/modules/alkiranet/azure-builder/alkira/latest) and [gcp-builder](https://registry.terraform.io/modules/alkiranet/gcp-builder/alkira/latest) to test and demonstrate a complete _end-to-end_ Multi-Cloud network. Since parameters like _vpc_id_ and _vpc_cidr_ exist in each cloud provider, just with different names, these modules use _network_id_ and _network_cidr_ for commonality.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
