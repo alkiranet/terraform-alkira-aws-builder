@@ -88,3 +88,15 @@ aws_vpc:
       env: 'sbox'
 ...
 ```
+
+### Connecting to EC2 instances
+By default, this module expects to have a _public_ and _private_ key in a folder called **files**. This _public key_ will be configured on each instance. You can connect to the instance using the _private key_ as follows:
+
+```shell
+ssh -i files/key ubuntu@1.2.3.4 # replace with key path and private IP of instance
+```
+
+:computer: To generate a new _SSH Key Pair_
+```shell
+mkdir -p keys && ssh-keygen -t rsa -f keys/key -b 4096
+```
