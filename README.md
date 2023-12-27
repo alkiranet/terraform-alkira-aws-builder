@@ -1,5 +1,5 @@
 # AWS Builder - Terraform Module
-This module creates various resources in _Alkira_ and _AWS_ from **.yaml** files.
+This module creates various resources in _Alkira_ and _AWS_ from **.yaml** files. This module is ideal for deploying a flexible and private network infrastructure for building POCs, demos, or general-purpose connectivity testing between _AWS_ or other _public cloud providers_.
 
 ## Basic Usage
 Reference [alkiranet/aws-builder/alkira](https://registry.terraform.io/modules/alkiranet/aws-builder/alkira/latest) as the _source_ and define the path to the **.yaml** configuration file.
